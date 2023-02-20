@@ -16,7 +16,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <intProp name="LoopController.loops">-1</intProp>
+          <stringProp name="LoopController.loops">5</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">10</stringProp>
         <stringProp name="ThreadGroup.ramp_time">30</stringProp>
@@ -28,13 +28,13 @@
       <hashTree>
         <com.gslab.pepper.config.plaintext.PlainTextConfigElement guiclass="TestBeanGUI" testclass="com.gslab.pepper.config.plaintext.PlainTextConfigElement" testname="Pepper-Box PlainText Config" enabled="true">
           <stringProp name="placeHolder">kafka-load</stringProp>
-          <stringProp name="jsonSchema">&lt;stat&gt;
-	&lt;statNum&gt;{{SEQUENCE(&quot;messageId&quot;, 1, 1)}}&lt;/statNum&gt;
-	&lt;statID&gt;{{UUID()}}&lt;/statID&gt;
-	&lt;unitID&gt;{{RANDOM_STRING(&quot;U301&quot;, &quot;U011&quot;, &quot;U321&quot;, &quot;U304&quot;)}}&lt;/unitID&gt;
-	&lt;stat&gt;{{RANDOM_ALPHA_NUMERIC(&quot;abcHIJ032&quot;, 150)}}&lt;/stat&gt;
-	&lt;timestamp&gt;{{TIMESTAMP()}}&lt;/timestamp&gt;
-&lt;/stat&gt;</stringProp>
+          <stringProp name="jsonSchema">{
+	&quot;messageId&quot;:{{SEQUENCE(&quot;messageId&quot;, 1, 1)}},
+	&quot;messageBody&quot;:&quot;{{RANDOM_ALPHA_NUMERIC(&quot;abcDEF123&quot;, 100)}}&quot;,
+	&quot;messageCategory&quot;:&quot;{{RANDOM_STRING(&quot;Finance&quot;, &quot;Insurance&quot;, &quot;Healthcare&quot;, &quot;Shares&quot;)}}&quot;,
+	&quot;messageStatus&quot;:&quot;{{RANDOM_STRING(&quot;Accepted&quot;,&quot;Pending&quot;,&quot;Processing&quot;,&quot;Rejected&quot;)}}&quot;,
+	&quot;messageTime&quot;:{{TIMESTAMP()}}
+}</stringProp>
         </com.gslab.pepper.config.plaintext.PlainTextConfigElement>
         <hashTree/>
         <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="Java Request" enabled="true">
@@ -135,121 +135,6 @@
           <stringProp name="classname">com.gslab.pepper.sampler.PepperBoxKafkaSampler</stringProp>
         </JavaSampler>
         <hashTree/>
-      </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
-        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-          <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">1</stringProp>
-        </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
-        <boolProp name="ThreadGroup.scheduler">false</boolProp>
-        <stringProp name="ThreadGroup.duration"></stringProp>
-        <stringProp name="ThreadGroup.delay"></stringProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
-      </ThreadGroup>
-      <hashTree>
-        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler" enabled="true">
-          <stringProp name="scriptLanguage">groovy</stringProp>
-          <stringProp name="parameters"></stringProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="script">import java.util.Properties;
-import java.util.Arrays;
-import org.apache.kafka.clients.consumer.*;
-
-//Define the certain properties that need to be passed to the constructor of a KafkaConsumer
-
-Properties props = new Properties();
-
-props.put(&quot;bootstrap.servers&quot;,&quot;DESKTOP-RQCIK6O:9092&quot;);
-
-props.put(&quot;group.id&quot;,&quot;consumer_id&quot;);
-
-props.put(&quot;enable.auto.commit&quot;,&quot;true&quot;);
-
-props.put(&quot;auto.commit.interval.ms&quot;,&quot;1000&quot;);
-
-props.put(&quot;session.timeout.ms&quot;,&quot;30000&quot;);
-
-props.put(&quot;key.deserializer&quot;,&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;);
-
-props.put(&quot;value.deserializer&quot;,&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;);
-
-
-
-// Create the consumer using props
-
-KafkaConsumer&lt;String, String&gt; consumer = new KafkaConsumer&lt;String, String&gt;(props);
-
-
-
-// Pass a list of topics to subscribe
-
-consumer.subscribe(Arrays.asList(&quot;load_test_kafka_with_jmeter&quot;));
-
-long t = System.currentTimeMillis();
-
-long end = t + 1000;
-
-FileOutputStream f = new FileOutputStream(&quot;.\\data.csv&quot;,true);
-PrintStream p = new PrintStream(f);
-
-while(System.currentTimeMillis()&lt;end)
-  {
-  ConsumerRecords&lt;String, String&gt; records = consumer.poll(100);
-  for (ConsumerRecord&lt;String, String&gt; record : records)
-  {
-  	p.println(&quot;offset = &quot;+record.offset()+&quot; value = &quot;+record.value());
-  }
-  consumer.commitSync();
-  }
-  consumer.close();
-  p.close();
-  f.close()
-
-consumer.close();</stringProp>
-        </JSR223Sampler>
-        <hashTree>
-          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
-            <boolProp name="ResultCollector.error_logging">false</boolProp>
-            <objProp>
-              <name>saveConfig</name>
-              <value class="SampleSaveConfiguration">
-                <time>true</time>
-                <latency>true</latency>
-                <timestamp>true</timestamp>
-                <success>true</success>
-                <label>true</label>
-                <code>true</code>
-                <message>true</message>
-                <threadName>true</threadName>
-                <dataType>true</dataType>
-                <encoding>false</encoding>
-                <assertions>true</assertions>
-                <subresults>true</subresults>
-                <responseData>false</responseData>
-                <samplerData>false</samplerData>
-                <xml>false</xml>
-                <fieldNames>true</fieldNames>
-                <responseHeaders>false</responseHeaders>
-                <requestHeaders>false</requestHeaders>
-                <responseDataOnError>false</responseDataOnError>
-                <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
-                <assertionsResultsToSave>0</assertionsResultsToSave>
-                <bytes>true</bytes>
-                <sentBytes>true</sentBytes>
-                <url>true</url>
-                <threadCounts>true</threadCounts>
-                <idleTime>true</idleTime>
-                <connectTime>true</connectTime>
-              </value>
-            </objProp>
-            <stringProp name="filename"></stringProp>
-          </ResultCollector>
-          <hashTree/>
-        </hashTree>
       </hashTree>
     </hashTree>
   </hashTree>
